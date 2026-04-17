@@ -4,12 +4,7 @@ import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from "class-v
     @IsString()
     @IsNotEmpty()
     @Length(2, 40)
-    readonly firstName!: string
-
-    @IsString()
-    @IsNotEmpty()
-    @Length(2, 40)
-    readonly lastName!: string
+    readonly fullName!: string
 
     @IsString()
     @IsEmail()
