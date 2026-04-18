@@ -6,6 +6,7 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { AuthModule } from './auth/auth.module';
    ConfigModule.forRoot({
     isGlobal: true
    }),
-   AuthModule
+   AuthModule,
+   LoggerModule
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService],
