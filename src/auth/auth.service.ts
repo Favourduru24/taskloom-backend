@@ -18,7 +18,7 @@ export class AuthService {
         const {email, fullName, password, } = dto
         
         const normalEmail =  email.toLowerCase()
-        this.logger.log(`signup:start email=${email}`)
+        // this.logger.log(`signup:start email=${email}`)
 
         const existingUser = await this.prisma.user.findUnique({where: {email: normalEmail}})
 
@@ -42,7 +42,7 @@ export class AuthService {
         throw error
     } 
      
-    this.logger.log(`signup:done email=${email}`)
+    // this.logger.log(`signup:done email=${email}`)
      return {message: 'User sign up successfully.'}
     }
 }
