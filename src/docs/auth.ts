@@ -1,8 +1,13 @@
 import { applyDecorators } from "@nestjs/common";
-import { ApiBody, ApiCreatedResponse, ApiExtraModels, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { LoginDto } from "src/auth/dto/login.dto";
 import { SignupDto } from "src/auth/dto/signup.dto";
-import { createdResponseExample } from "src/common/utils/handle";
+import { createdResponseExample, successResponseExample } from "src/common/utils/handle";
 
+const tokenPairExample = {
+  accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.access-token',
+  refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh-token',
+};
 
 export const AuthDocs = {
     controller: () => applyDecorators(ApiTags('auth')),
@@ -21,5 +26,23 @@ export const AuthDocs = {
         },
       }),
     ),
-     )
+     ),
+     login: () =>
+    applyDecorators(
+      ApiOperation({
+        summary: 'Login',
+        description: 'Login with email/password. If 2FA is enabled, returns requiresTwoFactor=true instead of tokens.',
+      }),
+      ApiExtraModels(LoginDto),
+      ApiBody({ type: LoginDto }),
+      ApiOkResponse({
+        description: 'Login successful or 2FA required',
+        schema: {
+          example: successResponseExample(
+            tokenPairExample,
+            'Login successful.',
+          ),
+        },
+      }),
+    )
 }

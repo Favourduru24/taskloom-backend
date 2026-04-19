@@ -96,3 +96,58 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Authentication
+
+I once read about how large systems like Netflix approach authentication with JSON Web Tokens, and one idea stuck with me:
+
+Don’t make the system remember more than it has to.
+
+So when I built the login system for Taskloom, I didn’t go fully stateless—and that decision mattered.
+
+**Here’s the approach I used:**
+
+User logs in.
+Server issues two tokens:
+
+* A short-lived access token
+* A long-lived refresh token
+
+Every request carries the access token.
+The server verifies the signature and moves on—no database lookup needed.
+
+But here’s where it gets interesting.
+
+Instead of trusting refresh tokens blindly, I made them **stateful**:
+
+* Each refresh token has a unique `jti`
+* Tokens are hashed and stored in the database
+* Every login creates a session tied to device and IP
+* On refresh, the old token is invalidated and replaced
+
+**Why not go fully stateless?**
+
+Because stateless breaks down when you need control.
+
+* You can’t revoke a stolen token
+* You can’t track sessions across devices
+* You can’t detect misuse
+
+So I split the responsibility:
+
+* Access tokens → stateless, fast, scalable
+* Refresh tokens → stateful, controlled, secure
+
+**Trade-off?**
+A bit more complexity and a few database lookups—but only where it matters.
+
+**What I learned**
+
+The best systems don’t blindly avoid state.
+They’re deliberate about *where* they keep it.
+
+Stateless where you need speed.
+Stateful where you need control.
+
+That balance is where systems start to scale quietly.
+
