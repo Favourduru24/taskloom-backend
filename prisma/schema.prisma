@@ -10,13 +10,55 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
- 
+
  model User {
-  id        String  @id     @default(uuid())
-  email     String  @unique
-  fullName  String 
-  password  String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
- }
+  id                    String             @id @default(uuid())
+  email                 String  @unique
+  fullName              String 
+  password              String?
+  avatarUrl             String?
+
+  refreshTokens          RefreshToken[]
+  loginSessions          LoginSession[]
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+}
+
+ model LoginSession {
+  id             String    @id @default(cuid())
+  userId         String
+  refreshTokenId String?
+  jti            String?
+  userAgent      String?
+  ipAddress      String?
+  device         String?
+  createdAt      DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+  revoked        Boolean   @default(false)
+  revokedAt      DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
+
+  @@index([userId, revoked])
+  @@index([userId, createdAt])
+}
+
+
+ model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  jti       String    @unique
+  tokenHash String
+  expiresAt DateTime
+  revoked   Boolean   @default(false)
+  revokedAt DateTime?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  loginSessions LoginSession[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([userId, revoked])
+  @@index([userId, createdAt])
+}
