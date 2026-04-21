@@ -6,10 +6,11 @@ import { LoggerModule } from 'src/logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppConfiguration } from 'src/config/app.config';
 import { AuthConfiguration } from 'src/config/auth.config';
+import { OtpService } from '../lib/otp.service';
 
 @Module({
     controllers: [AuthController],
-    providers: [AuthService],
+    providers: [AuthService, OtpService],
     imports: [
         ConfigModule.forFeature(AppConfiguration),
         ConfigModule.forFeature(AuthConfiguration),

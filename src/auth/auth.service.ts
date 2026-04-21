@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto';
 import { AppConfiguration } from 'src/config/app.config';
 import type { ConfigType } from '@nestjs/config';
 import { AuthConfiguration } from 'src/config/auth.config';
+import { OtpService } from 'src/lib/otp.service';
 
 type IssueContext = {
   userAgent?: string;
@@ -25,6 +26,7 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly logger: LoggerService,
+        private readonly otp: OtpService,
         @Inject(AppConfiguration.KEY)
         private readonly appCfg: ConfigType<typeof AppConfiguration>,
         @Inject(AuthConfiguration.KEY)
@@ -59,9 +61,9 @@ export class AuthService {
 
         throw error
     } 
-     
-    this.logger.log(`signup:done email=${email}`)
-     return {message: 'User sign up successfully.'}
+      const otpCode = await this.otp.sendOtp(email)
+     this.logger.log(`signup:done email=${email}`)
+     return {message: 'OTP sent', otp: otpCode}
     }
 
     async login(dto: LoginDto, ctx: IssueContext) {  

@@ -62,3 +62,11 @@ datasource db {
   @@index([userId, revoked])
   @@index([userId, createdAt])
 }
+
+model Otp {
+  id       String @id @default(uuid())
+  email    String @unique()
+  code     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
