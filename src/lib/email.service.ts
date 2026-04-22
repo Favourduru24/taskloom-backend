@@ -23,6 +23,7 @@ import { LoggerService } from "src/logger/logger.service";
       @Inject(MailerSendConfiguration.KEY)
         private readonly emailFg: ConfigType<typeof MailerSendConfiguration>
     ){
+        console.log('Api-key', this.emailFg.fromName)
         if(this.emailFg.apiKey) {
             this.mailerSend = new MailerSend({
                 apiKey: this.emailFg.apiKey

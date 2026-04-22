@@ -23,7 +23,7 @@ import { AuthConfiguration } from './config/auth.config';
    AuthModule,
    LoggerModule
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService, AuthService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

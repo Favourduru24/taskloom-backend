@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppConfiguration } from 'src/config/app.config';
 import { AuthConfiguration } from 'src/config/auth.config';
 import { OtpService } from '../lib/otp.service';
+import { EmailModule } from 'src/lib/email.module';
 
 @Module({
     controllers: [AuthController],
@@ -14,7 +15,7 @@ import { OtpService } from '../lib/otp.service';
     imports: [
         ConfigModule.forFeature(AppConfiguration),
         ConfigModule.forFeature(AuthConfiguration),
-        PrismaModule, LoggerModule
+        PrismaModule, LoggerModule, EmailModule
     ]
 })
 
