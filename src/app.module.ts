@@ -26,7 +26,7 @@ import { TaskController } from './task/task.controller';
    WorkspaceModule,
    TasksModule
   ],
-  controllers: [AppController, TaskController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

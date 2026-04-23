@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppConfiguration } from 'src/config/app.config';
 import { AuthConfiguration } from 'src/config/auth.config';
 import { OtpService } from '../lib/otp.service';
-import { EmailModule } from '../lib/email.module';
+import { EmailModule } from 'src/lib/email.module';
 
 @Module({
     controllers: [AuthController],

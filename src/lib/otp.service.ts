@@ -5,10 +5,13 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { EmailService } from "./email.service";
 import { LoggerService } from "src/logger/logger.service";
 
-@Injectable()
+ @Injectable()
  export class OtpService {
 
-    constructor(private readonly prisma: PrismaService, private readonly email: EmailService, private readonly logger: LoggerService){}
+    constructor(
+      private readonly prisma: PrismaService,
+      private readonly email: EmailService, 
+      private readonly logger: LoggerService){}
   
     async sendOtp(email: string) {
       const normalEmail = email.toLowerCase()
