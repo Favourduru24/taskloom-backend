@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req } from '@nestjs/common';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { SignupDto } from './dto/signup.dto';
 import { AuthService } from './auth.service';
@@ -12,7 +12,7 @@ import type { Request } from 'express';
 export class AuthController {
     constructor(
       private readonly authService: AuthService,
-      private readonly logger: LoggerService
+      private readonly logger = new Logger(AuthController.name)
     )
      {}
     

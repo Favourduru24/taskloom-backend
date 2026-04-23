@@ -150,16 +150,3 @@ Stateless where you need speed.
 Stateful where you need control.
 
 That balance is where systems start to scale quietly.
-
-// DATABASE_URL="postgresql://postgres:guardianp40@localhost:5432/taskloom"
-
-// CLIENT_BASE_URL=http://localhost:5000
-// API_BASE_URL=http://localhost:3000
-// JWT_ACCESS_TTL=4d
-// JWT_REFRESH_TTL=7d
-// ACCESS_TOKEN_SECRET=bf4d85e71f7063ff460a13bc85bf698fd0b804600496bbb0b784f1362fb56870bc196e84498afd36e2d6bd689b618c4edaf4f0d6f5c9589a798505db14738c48
-// REFRESH_TOKEN_SECRET=4b1654e2073ba4a3f4d9e062f6417b9a1163c7a59a853546927d019d6506836b17aa7fb43e1fe6e552754402eb00f9c2736ad4fb960c63f50d3ed6266050985a
-// MAILERSEND_API_KEY=mlsn.f6a8a4144a5b4df33652b24837e40afe16969044eae1eef1fad7f7353e76283d
-// MAILERSEND_FROM='durupristine@gmail.com'
-// MAILERSEND_FROM_NAME='Taskloom'
-
