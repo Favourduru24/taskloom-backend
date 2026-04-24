@@ -61,9 +61,7 @@ export class AuthService {
 
         throw error
     } 
-      const otpCode = await this.otp.sendOtp(email)
      this.logger.log(`signup:done email=${email}`)
-     return {message: 'OTP sent', otp: otpCode}
     }
 
     async login(dto: LoginDto, ctx: IssueContext) {  

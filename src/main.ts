@@ -11,6 +11,14 @@ async function bootstrap() {
     rawBody: true,
   });
 
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    maxAge: 3600,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  })
+
    app.useLogger(app.get(LoggerService))
    app.useGlobalPipes(
     new ValidationPipe({
