@@ -21,6 +21,13 @@ export class WorkspaceService {
                }
           })
 
+          const workspaceMember = await tx.workspaceMember.create({
+               data: {
+                    userId,
+                    workspaceId: workspace.id,
+               }
+          })
+
           return {workspace: [workspace]}
        })
      }
@@ -28,9 +35,9 @@ export class WorkspaceService {
     async list (userId: string) {
       this.logger.log(`fetching workspace list for ${userId}`)
 
-     //  return await this.prisma.workspace.findMany({where: {member: 
-     //      {some: {userId}}
-     // }})
+      return await this.prisma.workspace.findMany({where: {members: 
+          {some: {userId}}
+     }})
     }
 
 

@@ -21,6 +21,15 @@ enum WorkspaceMemberStatus {
  BLOCKED
 }
 
+enum Priority {
+  URGENT
+  NORMAL
+  LOW
+  TODO
+  INPROGRESS
+  COMPLETED
+}
+
  model User {
   id                    String             @id @default(uuid())
   email                 String  @unique
@@ -88,8 +97,9 @@ model Workspace {
   logoUrl       String?
   logoPublicId  String?
   members       WorkspaceMember[]
-  createdAt     DateTime
-  updatedAt     DateTime @updatedAt
+  tasks         Task[]
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model WorkspaceMember {
@@ -102,4 +112,30 @@ model WorkspaceMember {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@id([userId, workspaceId])
+}
+
+model Task {
+  id            String   @id @default(cuid())
+  title         String
+  category      String
+  description   String
+  endDate       String
+  priority      Priority
+  collaborators TaskCollaborator[]
+  images     
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())  
+
+  workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model TaskCollaborator {
+  id     String @id @default(cuid())
+  taskId String
+  userId String
+
+  task   Task @relation(fields: [taskId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@id([taskId, userId])
 }

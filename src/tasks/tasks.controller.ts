@@ -1,4 +1,26 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { TasksService } from './tasks.service';
+import { handle } from 'src/common/utils/handle';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { CreateTaskDto } from './dto/task.dto';
+import { LoggerService } from 'src/logger/logger.service';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { AuthUser } from 'src/auth/decorators/user.decorator';
+import type { User } from '@prisma/client';
 
 @Controller('tasks')
-export class TasksController {}
+@Auth()
+export class TasksController {
+
+    constructor(private readonly taskService: TasksService, readonly logger: LoggerService) {}
+    
+    @Post()
+    @ResponseMessage('Task created successfully.')
+    async create (@Body() dto: CreateTaskDto, @AuthUser() user: User) {
+        return handle(
+           this.logger,
+           () => this.taskService.createTask(dto, user.id),
+           'Taskcontroller.create'
+        )
+    }
+}
