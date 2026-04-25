@@ -1,7 +1,7 @@
-import {Logger } from '@nestjs/common';
+import { ConsoleLogger, Logger } from '@nestjs/common';
 
 export async function handle<T>(
-  logger: Logger,
+  logger: ConsoleLogger,
   fn: () => Promise<T>,
   context?: string,
 ): Promise<T> {

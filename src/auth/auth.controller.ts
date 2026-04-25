@@ -12,7 +12,7 @@ import type { Request } from 'express';
 export class AuthController {
     constructor(
       private readonly authService: AuthService,
-      private readonly logger = new Logger(Controller.name)
+      private readonly logger: LoggerService
     )
      {}
     

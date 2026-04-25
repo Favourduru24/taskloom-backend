@@ -11,6 +11,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum WorkspaceRole {
+ ADMIN
+ MEMBER
+}
+
+enum WorkspaceMemberStatus {
+ ACTIVE
+ BLOCKED
+}
+
  model User {
   id                    String             @id @default(uuid())
   email                 String  @unique
@@ -18,10 +28,11 @@ datasource db {
   password              String?
   avatarUrl             String?
 
-  refreshTokens          RefreshToken[]
-  loginSessions          LoginSession[]
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
+  refreshTokens         RefreshToken[]
+  loginSessions         LoginSession[]
+  workspaceMembers      WorkspaceMember[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 }
 
  model LoginSession {
@@ -37,8 +48,8 @@ datasource db {
   revoked        Boolean   @default(false)
   revokedAt      DateTime?
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refreshTokens RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens  RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
 
   @@index([userId, revoked])
   @@index([userId, createdAt])
@@ -69,4 +80,26 @@ model Otp {
   code     String
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Workspace {
+  id            String  @id @default(uuid())
+  name          String
+  logoUrl       String?
+  logoPublicId  String?
+  members       WorkspaceMember[]
+  createdAt     DateTime
+  updatedAt     DateTime @updatedAt
+}
+
+model WorkspaceMember {
+  userId      String
+  workspaceId String
+  status      WorkspaceMemberStatus @default(ACTIVE)
+  role        WorkspaceRole         @default(MEMBER)
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, workspaceId])
 }

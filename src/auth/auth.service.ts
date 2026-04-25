@@ -26,43 +26,56 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly logger: LoggerService,
-        private readonly otp: OtpService,
         @Inject(AppConfiguration.KEY)
         private readonly appCfg: ConfigType<typeof AppConfiguration>,
         @Inject(AuthConfiguration.KEY)
         private readonly authCfg: ConfigType<typeof AuthConfiguration>
-     ){}
+     ){
+
+      if (!this.authCfg.accessTokenSecret) {
+        throw new Error('JWT secret is not defined')
+      }
+
+      if (!this.appCfg.apiBaseUrl) {
+        throw new Error('Api secret is not defined')
+      }
+     }
     
-    async signupUser(dto: SignupDto) {
-       
-        const {email, fullName, password, } = dto
-        
-        const normalEmail =  email.toLowerCase()
+     async signupUser(dto: SignupDto) {
+        const { email, fullName, password } = dto
+      
+        const normalEmail = email.toLowerCase()
         this.logger.log(`signup:start email=${email}`)
-
-        const existingUser = await this.prisma.user.findUnique({where: {email: normalEmail}})
-
-        if(existingUser) throw new ConflictException('Email already registered')
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        try {
-           await this.prisma.user.create({
-                data: {
-                    fullName,
-                    password: hashedPassword,
-                    email: normalEmail
-                }
-            }) 
-        } catch (error) {
-           if(error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-            throw new ConflictException('Email already registered')
+      
+        const existingUser = await this.prisma.user.findUnique({
+          where: { email: normalEmail },
+        })
+      
+        if (existingUser) {
+          throw new ConflictException('Email already registered')
         }
-
-        throw error
-    } 
-     this.logger.log(`signup:done email=${email}`)
-    }
+      
+        const hashedPassword = await bcrypt.hash(password, 10)
+      
+        const user = await this.prisma.user.create({
+          data: {
+            fullName,
+            password: hashedPassword,
+            email: normalEmail,
+          },
+        })
+      
+        this.logger.log(`signup:done email=${email}`)
+      
+        return {
+          message: 'User created successfully',
+          user: {
+            id: user.id,
+            email: user.email,
+            fullName: user.fullName,
+          },
+        }
+      }
 
     async login(dto: LoginDto, ctx: IssueContext) {  
        const {email, password} = dto
@@ -110,6 +123,8 @@ export class AuthService {
         const db = tx || this.prisma
         const issuer = this.appCfg.apiBaseUrl
         const audience = this.appCfg.clientBaseUrl
+
+        console.log(issuer, audience)
 
         const jti = randomUUID()
 
