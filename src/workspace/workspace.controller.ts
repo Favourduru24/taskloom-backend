@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { handle } from 'src/common/utils/handle';
@@ -30,6 +30,15 @@ export class WorkspaceController {
        return handle(
         this.logger,
         () => this.workSpaceService.list(user.id),
+        'list' 
+       )
+    }
+    @Get(':workspaceId/member')
+    @ResponseMessage('Workspace Team members fetched successfully')
+    async workspaceMember(@AuthUser() user: User, @Param('workspaceId')  workspaceId: string) {
+       return handle(
+        this.logger,
+        () => this.workSpaceService.getWorkspaceMember(workspaceId, user.id),
         'list' 
        )
     }
