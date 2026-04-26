@@ -39,6 +39,7 @@ enum Priority {
 
   refreshTokens         RefreshToken[]
   loginSessions         LoginSession[]
+  collaborators          TaskCollaborator[]
   workspaceMembers      WorkspaceMember[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -98,7 +99,7 @@ model Workspace {
   logoPublicId  String?
   members       WorkspaceMember[]
   tasks         Task[]
-  expiresAt DateTime
+  expiresAt DateTime @updatedAt
   createdAt DateTime @default(now())
 }
 
@@ -119,23 +120,23 @@ model Task {
   title         String
   category      String
   description   String
-  endDate       String
+  endDate       DateTime?
   priority      Priority
   collaborators TaskCollaborator[]
-  images     
-  expiresAt     DateTime
+  imageUrl      String?
+  workspaceId   String
+  expiresAt     DateTime @updatedAt
   createdAt     DateTime @default(now())  
 
-  workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
 
 model TaskCollaborator {
-  id     String @id @default(cuid())
   taskId String
   userId String
 
-  task   Task @relation(fields: [taskId], references: [id])
-  user   User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@id([taskId, userId])
 }

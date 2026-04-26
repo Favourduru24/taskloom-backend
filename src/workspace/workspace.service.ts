@@ -2,7 +2,7 @@ import { Injectable} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { LoggerService } from 'src/logger/logger.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, WorkspaceRole } from '@prisma/client';
 
 @Injectable()
 export class WorkspaceService {
@@ -16,15 +16,15 @@ export class WorkspaceService {
 
           const workspace = await tx.workspace.create({
                data: {
-                    name: dto.name,
-                    createdAt: new Date()
+                    name: dto.name
                }
           })
 
-          const workspaceMember = await tx.workspaceMember.create({
+          await tx.workspaceMember.create({
                data: {
                     userId,
                     workspaceId: workspace.id,
+                    role: WorkspaceRole.ADMIN
                }
           })
 
@@ -32,14 +32,24 @@ export class WorkspaceService {
        })
      }
 
-    async list (userId: string) {
-      this.logger.log(`fetching workspace list for ${userId}`)
-
-      return await this.prisma.workspace.findMany({where: {members: 
-          {some: {userId}}
-     }})
-    }
-
+     async list(userId: string) {
+          this.logger.log(`fetching workspace list for ${userId}`);
+        
+          return await this.prisma.workspace.findMany({
+            where: {
+              members: {
+                some: { userId },
+              },
+            },
+            include: {
+              members: {
+                include: {
+                  user: true,
+                },
+              },
+            },
+          });
+        }
 
      
 }
