@@ -30,6 +30,12 @@ enum Priority {
   COMPLETED
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+  OTHER
+}
+
  model User {
   id                    String             @id @default(uuid())
   email                 String  @unique
@@ -39,7 +45,8 @@ enum Priority {
 
   refreshTokens         RefreshToken[]
   loginSessions         LoginSession[]
-  collaborators          TaskCollaborator[]
+  MediaAsset            MediaAsset[]
+  collaborators         TaskCollaborator[]
   workspaceMembers      WorkspaceMember[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -97,7 +104,9 @@ model Workspace {
   name          String
   logoUrl       String?
   logoPublicId  String?
+  cloudinaryFolder    String?
   members       WorkspaceMember[]
+  mediaAsset    MediaAsset[]
   tasks         Task[]
   expiresAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -139,4 +148,24 @@ model TaskCollaborator {
   user User @relation(fields: [userId], references: [id])
 
   @@id([taskId, userId])
+}
+
+model MediaAsset {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  userId       String?
+  type         MediaType @default(IMAGE)
+  publicId     String
+  url          String
+  format       String?
+  width        Int?
+  height       Int?
+  bytes        Int?
+  folder       String?
+  originalName String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user         User?     @relation(fields: [userId], references: [id])
+  @@index([workspaceId, createdAt])
 }

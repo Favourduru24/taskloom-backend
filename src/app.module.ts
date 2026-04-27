@@ -10,6 +10,9 @@ import { AuthConfiguration } from './config/auth.config';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { TasksModule } from './tasks/tasks.module';
 // import { TaskController } from './task/task.controller';
+import { LibraryModule } from './library/library.module';
+import { LibaryController } from './libary/libary.controller';
+import { LibaryService } from './libary/libary.service';
 
 @Module({
   imports: [
@@ -24,9 +27,10 @@ import { TasksModule } from './tasks/tasks.module';
    AuthModule,
    LoggerModule,
    WorkspaceModule,
-   TasksModule
+   TasksModule,
+   LibraryModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, LibaryController],
+  providers: [AppService, LibaryService],
 })
 export class AppModule {}

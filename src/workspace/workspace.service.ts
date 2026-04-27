@@ -3,11 +3,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { WorkspaceDto } from './dto/workspace.dto';
 import { LoggerService } from 'src/logger/logger.service';
 import { Prisma, WorkspaceRole } from '@prisma/client';
+import { CloudinaryService } from 'src/lib/cloudinary.service';
 
 @Injectable()
 export class WorkspaceService {
 
-     constructor(private readonly prisma: PrismaService, private readonly logger: LoggerService){}
+     constructor(private readonly prisma: PrismaService, private readonly logger: LoggerService, private readonly cloudinary: CloudinaryService){}
 
      async create (userId: string, dto: WorkspaceDto) {
       this.logger.log(`create workspace name ${dto.name} by ${userId}`, 'Workspace service' )
@@ -19,6 +20,13 @@ export class WorkspaceService {
                     name: dto.name
                }
           })
+
+          const cloudinaryFolder = this.cloudinary.buildCompanyFolder(workspace.id);
+
+          await tx.workspace.update({
+            where: { id: workspace.id },
+            data: { cloudinaryFolder },
+          });
 
           await tx.workspaceMember.create({
                data: {
@@ -41,6 +49,7 @@ export class WorkspaceService {
                 some: { userId },
               },
             },
+            orderBy: {createdAt: 'desc'},
             include: {
               members: {
                 include: {
