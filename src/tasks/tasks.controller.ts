@@ -25,11 +25,12 @@ export class TasksController {
     @Get(':workspaceId')
     @ResponseMessage('Task fetched successfully.')
     async getWorkspaceTask(
+      @AuthUser() user: User,
       @Param('workspaceId') workspaceId: string,
     ) {
       return handle(
         this.logger,
-        () => this.taskService.getTask(workspaceId),
+        () => this.taskService.getTask(workspaceId, user.id),
         'TaskController.getTask'
       );
     }

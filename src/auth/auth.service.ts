@@ -45,7 +45,7 @@ export class AuthService {
         const { email, fullName, password } = dto
       
         const normalEmail = email.toLowerCase()
-        this.logger.log(`signup:start email=${email}`)
+        this.logger.log(`signup:start email=${email} ${fullName}`)
       
         const existingUser = await this.prisma.user.findUnique({
           where: { email: normalEmail },
@@ -59,7 +59,7 @@ export class AuthService {
       
         const user = await this.prisma.user.create({
           data: {
-            fullName,
+            fullName: fullName,
             password: hashedPassword,
             email: normalEmail,
           },

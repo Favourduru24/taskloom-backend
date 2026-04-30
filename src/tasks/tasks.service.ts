@@ -37,8 +37,20 @@ export class TasksService {
         })
     }
     
-    async getTask(workspaceId: string) {
+    async getTask(workspaceId: string, userId: string) {
         this.logger.log(`fetching task list for ${workspaceId}`);
+
+        const member = await this.prisma.workspace.findFirst({
+          where: {
+            id: workspaceId,
+             members: {some: {userId: userId}}
+          },
+          include: {members: true, }
+        });
+         
+        if (!member) {
+          throw new NotFoundException('User is not a member of this workspace');
+        }
       
         const tasks = await this.prisma.task.findMany({
           where: { workspaceId },
@@ -51,4 +63,5 @@ export class TasksService {
       
         return tasks;
       }
-}
+
+    }

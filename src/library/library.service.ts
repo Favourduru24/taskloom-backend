@@ -24,8 +24,8 @@ export class LibraryService {
 
     async uploadAsset(file: Express.Multer.File, workspaceId: string, userId: string) {
 
-        if(!file) throw new BadRequestException('Media file is required.')
-        
+        if(!file || !workspaceId) throw new BadRequestException('Media file is required.')
+    
          await this.isMemberOfWorkspace(userId, workspaceId)
 
         const mime = file.mimetype ?? ''
