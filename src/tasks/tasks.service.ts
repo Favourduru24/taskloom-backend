@@ -1,8 +1,9 @@
-import { HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateTaskDto } from './dto/task.dto';
+import { ForbiddenException, HttpStatus, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { Prisma } from '@prisma/client';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
@@ -63,5 +64,71 @@ export class TasksService {
       
         return tasks;
       }
+
+      async editTask(
+        userId: string,
+        workspaceId: string,
+        taskId: string,
+        dto: UpdateTaskDto,
+      ) {
+        const task = await this.prisma.task.findFirst({
+          where: { workspaceId, id: taskId },
+          include: { collaborators: true },
+        });
+      
+        if (!task) {
+          throw new NotFoundException('Task not found in this workspace');
+        }
+      
+        const isCollaborator = task.collaborators.some(
+          (collab) => collab.userId === userId,
+        );
+      
+        if (!isCollaborator) {
+          throw new ForbiddenException('Access Denied.');
+        }
+      
+        const { collaboratorIds, ...rest } = dto;
+      
+        return this.prisma.task.update({
+          where: { id: taskId },
+          data: {
+            ...rest,
+            endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      
+            ...(collaboratorIds && {
+              collaborators: {
+                set: collaboratorIds.map((userId) => ({
+                  taskId_userId: {
+                    taskId,
+                    userId,
+                  },
+                })),
+              },
+            }),
+          },
+        });
+      }
+
+      async getTaskDetails (userId: string, workspaceId: string, taskId) {
+         const isWorkspaceMemeber = await this.prisma.workspaceMember.findUnique({
+          where: {userId_workspaceId: {userId, workspaceId}}
+         })
+
+         if(!isWorkspaceMemeber){
+          throw new ForbiddenException('Not a member of this workspace')
+         }
+
+         const task = this.prisma.task.findUnique({
+          where: {id: taskId, workspaceId: workspaceId},
+         })
+
+         if(!task) {
+          throw new NotFoundException('Task not found.')
+         }
+
+         return task
+      }
+     
 
     }

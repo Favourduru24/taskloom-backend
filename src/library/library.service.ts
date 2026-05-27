@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { MediaType,  } from '@prisma/client';
 import { CloudinaryService, UploadedAsset } from 'src/lib/cloudinary.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -55,4 +55,26 @@ export class LibraryService {
         }
        })
     }
+
+    async listAsset (userId: string, workspaceId: string) {
+      
+       const isMember = await this.prisma.workspace.findFirst({
+        where: {id: workspaceId, members: {some: {userId}}}, include: {members: true}})
+
+       if(!isMember){
+        throw new ForbiddenException('Access denied not a member of workspace')
+       }
+
+       const mediaAsset = await this.prisma.mediaAsset.findMany({
+        where: {workspaceId}
+       })
+
+       if(!mediaAsset){
+        throw new NotFoundException('Media Asset not found.')
+       }
+
+       return mediaAsset
+    }
 }
+
+// library/9af2f2a2-aeb1-4b09-a576-1c386aac571d/list
