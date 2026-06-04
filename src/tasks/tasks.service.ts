@@ -9,6 +9,27 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TasksService {
     constructor(private readonly prisma: PrismaService, private readonly logger: LoggerService) {}
     
+    async canAccessWorkspace(userId: string, workspaceId: string) {
+      
+      const workspace = await this.prisma.workspace.findUnique({
+        where: {id: workspaceId}
+      })
+
+      if(!workspace) {
+        throw new UnauthorizedException('Workspace not found.')
+      }
+
+      const member = await this.prisma.workspaceMember.findUnique({
+        where: {userId_workspaceId: {userId, workspaceId: workspace.id}}
+      })
+
+      if(!member) {
+        throw new UnauthorizedException('Not a member of workpsace')
+      }
+   
+      return workspace
+    }
+
     async createTask (dto: CreateTaskDto, userId) {
         
         this.logger.log(`create task ${dto.title} by ${userId}`, 'Task Service')
@@ -46,7 +67,7 @@ export class TasksService {
             id: workspaceId,
              members: {some: {userId: userId}}
           },
-          include: {members: true, }
+          include: {members: true}
         });
          
         if (!member) {

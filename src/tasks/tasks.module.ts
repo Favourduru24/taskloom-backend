@@ -7,6 +7,7 @@ import { LoggerModule } from 'src/logger/logger.module';
 @Module({
   controllers: [TasksController],
   providers: [TasksService],
-  imports: [PrismaModule, LoggerModule]
+  imports: [PrismaModule, LoggerModule],
+  exports: [TasksService]
 })
 export class TasksModule {}

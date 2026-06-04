@@ -27,7 +27,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
    WorkspaceModule,
    TasksModule,
    LibraryModule,
-  //  DashboardModule
+   DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
