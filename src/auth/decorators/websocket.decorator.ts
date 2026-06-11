@@ -1,22 +1,25 @@
-import { Socket } from 'socket.io';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '../jwt.service';
-import { WebSocketGuard } from './websocket.guard';
+import { Socket } from "socket.io";
+import { AuthService } from "../auth.service";
 
-export type SocketIOMiddleware = {
-  (client: Socket, next: (err?: Error) => void);
-};
-
-export const SocketAuthMiddleware = (
-  jwtService: JwtService,
-  configService: ConfigService,
-): SocketIOMiddleware => {
-  return (client, next) => {
+export function WebSocketAuthMiddleware(
+  authService: AuthService,
+) {
+  return async (socket: Socket, next: Function) => {
     try {
-      WebSocketGuard.validateToken(client, jwtService, configService);
+      const token =
+        socket.handshake.auth?.token ||
+        socket.handshake.headers.authorization?.split(' ')[1];
+
+      if (!token) return next(new Error('Unauthorized'));
+
+      const user =
+        await authService.validateAccessToken(token);
+
+      socket.data.user = user;
+
       next();
-    } catch (error) {
-      next(error);
+    } catch {
+      next(new Error('Unauthorized'));
     }
   };
-};
+}
