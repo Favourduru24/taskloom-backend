@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -9,6 +9,7 @@ import { AuthConfiguration } from 'src/config/auth.config';
 import { OtpService } from '../lib/otp.service';
 import { EmailModule } from 'src/lib/email.module';
 
+@Global()
 @Module({
     controllers: [AuthController],
     providers: [AuthService, OtpService],
@@ -16,7 +17,8 @@ import { EmailModule } from 'src/lib/email.module';
         ConfigModule.forFeature(AppConfiguration),
         ConfigModule.forFeature(AuthConfiguration),
         PrismaModule, LoggerModule, EmailModule
-    ]
+    ],
+    exports: [AuthService]
 })
 
 export class AuthModule {

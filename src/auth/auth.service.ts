@@ -11,7 +11,6 @@ import { randomUUID } from 'crypto';
 import { AppConfiguration } from 'src/config/app.config';
 import type { ConfigType } from '@nestjs/config';
 import { AuthConfiguration } from 'src/config/auth.config';
-import { OtpService } from 'src/lib/otp.service';
 
 type IssueContext = {
   userAgent?: string;
@@ -192,5 +191,27 @@ export class AuthService {
 
         this.logger.log(`issueTokens`, 'Auth service')
         return {accessToken, refreshToken}
+    }
+
+    async validateAccessToken(token: string) {
+      const payload = jwt.verify(
+        token,
+        this.authCfg.accessTokenSecret,
+        {
+          algorithms: ['HS256'],
+          issuer: this.appCfg.apiBaseUrl,
+          audience: this.appCfg.clientBaseUrl,
+        },
+      ) as jwt.JwtPayload & { sub?: string };
+  
+      if (!payload.sub) throw new UnauthorizedException();
+  
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+  
+      if (!user) throw new UnauthorizedException();
+  
+      return user;
     }
 }
