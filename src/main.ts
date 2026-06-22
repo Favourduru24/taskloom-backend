@@ -12,7 +12,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: '*',
+    origin: 'http://localhost:3001',
     methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     maxAge: 3600,
     preflightContinue: false,
