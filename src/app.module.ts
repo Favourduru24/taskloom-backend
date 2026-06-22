@@ -11,6 +11,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { TasksModule } from './tasks/tasks.module';
 import { LibraryModule } from './library/library.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { EventGateway } from './event/event.gateway';
 
 @Module({
   imports: [
@@ -30,6 +31,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
    DashboardModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, EventGateway],
 })
 export class AppModule {}
