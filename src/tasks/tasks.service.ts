@@ -4,10 +4,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { Prisma } from '@prisma/client';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { EventGateway } from 'src/event/event.gateway';
 
 @Injectable()
 export class TasksService {
-    constructor(private readonly prisma: PrismaService, private readonly logger: LoggerService) {}
+    constructor(
+      private readonly prisma: PrismaService, 
+      private readonly logger: LoggerService,
+      private readonly eventGateway: EventGateway
+    ) {}
     
     async canAccessWorkspace(userId: string, workspaceId: string) {
       
@@ -30,7 +35,7 @@ export class TasksService {
       return workspace
     }
 
-    async createTask (dto: CreateTaskDto, userId) {
+    async createTask (dto: CreateTaskDto, userId: string) {
         
         this.logger.log(`create task ${dto.title} by ${userId}`, 'Task Service')
 
@@ -54,9 +59,12 @@ export class TasksService {
                 userId: userIds
              }))
            })
+            
+           this.eventGateway.emitTasksCreated(userId, newTask.workspaceId, newTask)
 
            return {newTask: [newTask]}
         })
+
     }
     
     async getTask(workspaceId: string, userId: string) {

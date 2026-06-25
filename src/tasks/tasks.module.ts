@@ -3,12 +3,12 @@ import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { LoggerModule } from 'src/logger/logger.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { EventModule } from 'src/event/event-module';
 
 @Module({
   controllers: [TasksController],
   providers: [TasksService],
-  imports: [PrismaModule, LoggerModule],
+  imports: [PrismaModule, LoggerModule, EventModule],
   exports: [TasksService],
 })
 export class TasksModule {}
