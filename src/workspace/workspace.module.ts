@@ -8,6 +8,7 @@ import { CloudinaryModule } from 'src/lib/cloudinary.module';
 @Module({
   providers: [WorkspaceService],
   controllers: [WorkspaceController],
-  imports: [PrismaModule, LoggerModule, CloudinaryModule]
+  imports: [PrismaModule, LoggerModule, CloudinaryModule],
+  exports: [WorkspaceService]
 })
 export class WorkspaceModule {}
