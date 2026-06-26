@@ -134,8 +134,8 @@ model Task {
   collaborators TaskCollaborator[]
   imageUrl      String?
   workspaceId   String
-  expiresAt     DateTime @updatedAt
   createdAt     DateTime @default(now())  
+  updatedAt     DateTime @updatedAt
 
   workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
@@ -144,8 +144,8 @@ model TaskCollaborator {
   taskId String
   userId String
 
-  task Task @relation(fields: [taskId], references: [id])
-  user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([taskId, userId])
 }

@@ -191,7 +191,6 @@ this.server
 } 
 
 async emitTasksCreated(senderId: string, workspaceId: string, task: any) {
- 
   const sender = this.onlineUsers.find(
     (u) => u.userId === senderId
   );
@@ -207,6 +206,52 @@ async emitTasksCreated(senderId: string, workspaceId: string, task: any) {
     this.server.to(`workspace:${workspaceId}`).emit("task:new", task);
   } 
 
+}
+
+async emitTaskUpdated(
+  senderId: string,
+  workspaceId: string,
+  task: any,
+) {
+  const sender = this.onlineUsers.find(
+    (u) => u.userId === senderId,
+  );
+
+  const senderSocketId = sender?.socketId;
+
+  if (senderSocketId) {
+    this.server
+      .to(`workspace:${workspaceId}`)
+      .except(senderSocketId)
+      .emit("task:updated", task);
+  } else {
+    this.server
+      .to(`workspace:${workspaceId}`)
+      .emit("task:updated", task);
+  }
+}
+
+async emitTaskDeleted(
+  senderId: string,
+  workspaceId: string,
+  taskId: string,
+) {
+  const sender = this.onlineUsers.find(
+    (u) => u.userId === senderId,
+  );
+
+  const senderSocketId = sender?.socketId;
+
+  if (senderSocketId) {
+    this.server
+      .to(`workspace:${workspaceId}`)
+      .except(senderSocketId)
+      .emit("task:deleted", { taskId });
+  } else {
+    this.server
+      .to(`workspace:${workspaceId}`)
+      .emit("task:deleted", { taskId });
+  }
 }
 
 }
