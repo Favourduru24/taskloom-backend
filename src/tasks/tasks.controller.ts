@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { handle } from 'src/common/utils/handle';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
@@ -53,6 +53,16 @@ export class TasksController {
          this.logger,
         () => this.taskService.getTaskDetails(user.id, workspaceId, taskId),
         'task.detail'
+      )
+    }
+
+    @Delete(':workspaceId/task/:taskId')
+    @ResponseMessage('Task deleted successfully')
+    async deleteTask(@AuthUser() user: User, @Param('workspaceId') workspaceId: string, @Param('taskId') taskId: string) {
+      return handle(
+        this.logger,
+        () => this.taskService.deleteTask(user.id, workspaceId, taskId),
+        'task.deleted'
       )
     }
 }

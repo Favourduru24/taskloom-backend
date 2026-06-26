@@ -24,9 +24,12 @@ export class TasksService {
         throw new UnauthorizedException('Workspace not found.')
       }
 
-      const member = await this.prisma.workspaceMember.findUnique({
-        where: {userId_workspaceId: {userId, workspaceId: workspace.id}}
-      })
+      const member = await this.prisma.workspaceMember.findFirst({
+        where: { 
+          userId: userId,
+          workspaceId: workspace.id 
+        }
+      });
 
       if(!member) {
         throw new UnauthorizedException('Not a member of workpsace')
@@ -85,6 +88,7 @@ export class TasksService {
         const tasks = await this.prisma.task.findMany({
           where: { workspaceId },
           include: { collaborators: {include: {user: true}}},
+          orderBy: {updatedAt: 'desc'},
         });
       
         if (!tasks.length) {
@@ -93,6 +97,7 @@ export class TasksService {
       
         return tasks;
       }
+
 
       async editTask(
         userId: string,
@@ -106,7 +111,9 @@ export class TasksService {
         });
       
         if (!task) {
-          throw new NotFoundException('Task not found in this workspace');
+          throw new NotFoundException(
+            'Task not found in this workspace',
+          );
         }
       
         const isCollaborator = task.collaborators.some(
@@ -119,11 +126,13 @@ export class TasksService {
       
         const { collaboratorIds, ...rest } = dto;
       
-        return this.prisma.task.update({
+        const updatedTask = await this.prisma.task.update({
           where: { id: taskId },
           data: {
             ...rest,
-            endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+            endDate: dto.endDate
+              ? new Date(dto.endDate)
+              : undefined,
       
             ...(collaboratorIds && {
               collaborators: {
@@ -136,7 +145,18 @@ export class TasksService {
               },
             }),
           },
+          include: {
+            collaborators: true,
+          },
         });
+      
+        await this.eventGateway.emitTaskUpdated(
+          userId,
+          workspaceId,
+          updatedTask,
+        );
+      
+        return updatedTask;
       }
 
       async getTaskDetails (userId: string, workspaceId: string, taskId) {
@@ -158,6 +178,24 @@ export class TasksService {
 
          return task
       }
-     
+
+      async deleteTask(userId: string, workspaceId: string, taskId: string): Promise<void> {
+         
+         await this.canAccessWorkspace(userId, workspaceId);
+      
+        const task = await this.prisma.task.findUnique({
+          where: { id: taskId, workspaceId },
+        });
+      
+        if (!task) {
+          throw new NotFoundException('Task not found.');
+        }
+      
+        await this.prisma.task.delete({
+          where: { id: taskId },
+        });
+
+        await this.eventGateway.emitTaskDeleted(userId, workspaceId, taskId);
+      }
 
     }
