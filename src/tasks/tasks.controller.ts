@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { handle } from 'src/common/utils/handle';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
@@ -8,6 +8,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { AuthUser } from 'src/auth/decorators/user.decorator';
 import type { User } from '@prisma/client';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { GetTaskQueryDto } from './dto/get-tasks-query.dto';
 
 @Controller('tasks')
 @Auth()
@@ -28,10 +29,11 @@ export class TasksController {
     async getWorkspaceTask(
       @AuthUser() user: User,
       @Param('workspaceId') workspaceId: string,
+      @Query() query: GetTaskQueryDto
     ) {
       return handle(
         this.logger,
-        () => this.taskService.getTask(workspaceId, user.id),
+        () => this.taskService.getTask(workspaceId, user.id, query),
         'TaskController.getTask'
       );
     }

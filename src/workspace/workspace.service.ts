@@ -66,8 +66,7 @@ export class WorkspaceService {
 
         const member = await this.prisma.workspaceMember.findMany({
           where: {
-            userId,
-            workspaceId,
+            workspaceId
           },
           include: {user: true}
         });

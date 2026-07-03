@@ -1,16 +1,17 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { LoggerService } from 'src/logger/logger.service';
 import { LoginDto } from './dto/login.dto';
-import { Prisma } from '@prisma/client';
+import { MediaType, Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken'
 import { randomUUID } from 'crypto';
 import { AppConfiguration } from 'src/config/app.config';
 import type { ConfigType } from '@nestjs/config';
 import { AuthConfiguration } from 'src/config/auth.config';
+import { CloudinaryService, UploadedAsset } from 'src/lib/cloudinary.service';
 
 type IssueContext = {
   userAgent?: string;
@@ -25,6 +26,7 @@ export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly logger: LoggerService,
+        private readonly cloudinary: CloudinaryService,
         @Inject(AppConfiguration.KEY)
         private readonly appCfg: ConfigType<typeof AppConfiguration>,
         @Inject(AuthConfiguration.KEY)
@@ -123,8 +125,6 @@ export class AuthService {
         const issuer = this.appCfg.apiBaseUrl
         const audience = this.appCfg.clientBaseUrl
 
-        console.log(issuer, audience)
-
         const jti = randomUUID()
 
         const accessToken = jwt.sign(
@@ -213,5 +213,36 @@ export class AuthService {
       if (!user) throw new UnauthorizedException();
   
       return user;
+    }
+
+    async uploadProfilePics (userId: string, file: Express.Multer.File) {
+         if(!file) throw new BadRequestException('Media file is required.')
+            
+                const mime = file.mimetype ?? ''
+        
+                const mediaType = mime.startsWith('image/') ? MediaType.IMAGE : mime.startsWith('video/') ? MediaType.VIDEO : null
+        
+                if(!mediaType) throw new BadRequestException('Unsupported file type. Upload an image or video')
+        
+               const uploaded: UploadedAsset = await this.cloudinary.uploadAsset(file.buffer, {
+                folder: '',
+                resourceType: mediaType === MediaType.VIDEO ? 'video' : 'image'
+               })
+
+               return this.prisma.user.update({
+                where: {id: userId},
+                data: {avatarUrl: uploaded.url}
+               })
+    }
+
+    async getProfile(userId: string) {
+
+      const user = await this.prisma.user.findUnique({
+         where: {id: userId}
+      })
+
+      if(!user) throw new BadRequestException('User not found.')
+
+        return user
     }
 }

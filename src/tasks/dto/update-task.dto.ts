@@ -29,9 +29,9 @@ import {
     @IsDateString() // matches DateTime
     readonly endDate?: string;
   
-    @IsEnum(Priority)
     @IsOptional()
-    readonly priority: Priority;
+    @IsEnum(Priority)
+    readonly priority?: Priority;
   
     @IsArray()
     @IsOptional()
