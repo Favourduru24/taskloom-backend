@@ -8,6 +8,7 @@ import { AppConfiguration } from 'src/config/app.config';
 import { AuthConfiguration } from 'src/config/auth.config';
 import { OtpService } from '../lib/otp.service';
 import { EmailModule } from 'src/lib/email.module';
+import { CloudinaryModule } from 'src/lib/cloudinary.module';
 
 @Global()
 @Module({
@@ -16,7 +17,7 @@ import { EmailModule } from 'src/lib/email.module';
     imports: [
         ConfigModule.forFeature(AppConfiguration),
         ConfigModule.forFeature(AuthConfiguration),
-        PrismaModule, LoggerModule, EmailModule
+        PrismaModule, LoggerModule, EmailModule, CloudinaryModule
     ],
     exports: [AuthService]
 })

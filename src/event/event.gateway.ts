@@ -96,7 +96,6 @@ export class EventGateway
 
   handleConnection(client: Socket) {
     console.log('Connected:', client.id);
-    console.log('User:', client.data.user);
   }
 
   handleDisconnect(client: Socket) {

@@ -5,6 +5,7 @@ import { LoggerService } from 'src/logger/logger.service';
 import { Prisma } from '@prisma/client';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { EventGateway } from 'src/event/event.gateway';
+import { GetTaskQueryDto } from './dto/get-tasks-query.dto';
 
 @Injectable()
 export class TasksService {
@@ -70,23 +71,30 @@ export class TasksService {
 
     }
     
-    async getTask(workspaceId: string, userId: string) {
+    async getTask(workspaceId: string, userId: string, query: GetTaskQueryDto) {
+
         this.logger.log(`fetching task list for ${workspaceId}`);
 
         const member = await this.prisma.workspace.findFirst({
           where: {
             id: workspaceId,
-             members: {some: {userId: userId}}
+            members: {some: {userId: userId}}
           },
           include: {members: true}
         });
-         
+        
         if (!member) {
           throw new NotFoundException('User is not a member of this workspace');
         }
-      
+        
+        const where: Prisma.TaskWhereInput = {workspaceId}
+
+        if(query.priority) {
+          where.priority = query.priority
+        }
+
         const tasks = await this.prisma.task.findMany({
-          where: { workspaceId },
+          where,
           include: { collaborators: {include: {user: true}}},
           orderBy: {updatedAt: 'desc'},
         });
@@ -169,7 +177,7 @@ export class TasksService {
          }
 
          const task = this.prisma.task.findUnique({
-          where: {id: taskId, workspaceId: workspaceId},
+          where: {id: taskId, workspaceId: workspaceId}, include: {collaborators: {include: {user: true}}}
          })
 
          if(!task) {

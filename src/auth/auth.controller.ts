@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Patch, Post, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { SignupDto } from './dto/signup.dto';
 import { AuthService } from './auth.service';
@@ -7,6 +7,10 @@ import { LoggerService } from 'src/logger/logger.service';
 import { AuthDocs } from 'src/docs/auth';
 import { LoginDto } from './dto/login.dto';
 import type { Request } from 'express';
+import { AuthUser } from './decorators/user.decorator';
+import type { User } from '@prisma/client';
+import { Auth } from './decorators/auth.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -37,4 +41,27 @@ export class AuthController {
            'AuthController.login'
         )
     }
+
+    @Get('/user/profile')
+    @Auth()
+    @ResponseMessage('Profile fetch successfully')
+    getProfile(@AuthUser() user: User) { 
+      return handle(
+        this.logger, 
+        () => this.authService.getProfile(user.id), 
+        'AuthController.getProfile'
+      ); 
+    }
+
+@Patch('/user/upload')
+@Auth()
+@UseInterceptors(FileInterceptor('file')) 
+@ResponseMessage('Profile picture uploaded successfully')
+uploadProfilePicture(@AuthUser() user: User, @UploadedFile() file: Express.Multer.File) { 
+  return handle(
+    this.logger, 
+    () => this.authService.uploadProfilePics(user.id, file), 
+    'AuthController.upload'
+  ); 
+}
 }

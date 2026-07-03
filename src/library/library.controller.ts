@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { User } from '@prisma/client';
 import { AuthUser } from 'src/auth/decorators/user.decorator';
