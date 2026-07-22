@@ -13,6 +13,7 @@ import { LibraryModule } from './library/library.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 // import { EventGateway } from './event/event.gateway';
 import { EventModule } from './event/event-module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { EventModule } from './event/event-module';
    TasksModule,
    LibraryModule,
    DashboardModule,
-   EventModule
+   EventModule,
+   ContactsModule
   ],
   controllers: [AppController],
   providers: [AppService],
