@@ -30,6 +30,13 @@ enum Priority {
   COMPLETED
 }
 
+enum ContactPriority {
+  ACTIVE
+  INACTIVE
+  PROPECT
+  LEAD
+}
+
 enum MediaType {
   IMAGE
   VIDEO
@@ -108,6 +115,7 @@ model Workspace {
   members       WorkspaceMember[]
   mediaAsset    MediaAsset[]
   tasks         Task[]
+  contact       Contact[]
   expiresAt DateTime @updatedAt
   createdAt DateTime @default(now())
 }
@@ -149,6 +157,30 @@ model TaskCollaborator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([taskId, userId])
+}
+
+model Contact {
+  id                  String   @id @default(cuid())
+  name                String
+  number              String
+  email               String
+  location            String
+  company             String?
+  status              String
+  linkedinUrl         String?
+  website             String?
+  relationshipSummary String
+  source              String
+  contactUrl          String?
+  priority            ContactPriority?
+  lastContact         DateTime?
+  nextFollowUp        DateTime?
+  workspaceId         String
+
+ createdAt            DateTime @default(now())  
+ updatedAt            DateTime @updatedAt
+ workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+ @@unique([workspaceId, priority])
 }
 
 model MediaAsset {
