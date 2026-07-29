@@ -14,6 +14,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 // import { EventGateway } from './event/event.gateway';
 import { EventModule } from './event/event-module';
 import { ContactsModule } from './contacts/contacts.module';
+import {ScheduleModule} from '@nestjs/schedule'
+import { ConversationModule } from './conversation/conversation.module';
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { ContactsModule } from './contacts/contacts.module';
    LibraryModule,
    DashboardModule,
    EventModule,
-   ContactsModule
+   ContactsModule,
+   ScheduleModule.forRoot(),
+   ConversationModule
   ],
   controllers: [AppController],
   providers: [AppService],

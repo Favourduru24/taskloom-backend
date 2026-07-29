@@ -150,3 +150,5 @@ Stateless where you need speed.
 Stateful where you need control.
 
 That balance is where systems start to scale quietly.
+
+i used Ai to help me get the entire and clear concept of the entire project and generate me some Schema for my database that is a better start than i blank Vs studio code page
