@@ -43,6 +43,20 @@ enum MediaType {
   OTHER
 }
 
+enum ReminderStatus {
+  PENDING
+  SENT
+  COMPLETED
+  CANCELLED
+}
+
+enum ConversationSource {
+  GMAIL
+  LINKEDIN
+  WHATAPP
+  OTHER
+}
+
  model User {
   id                    String             @id @default(uuid())
   email                 String  @unique
@@ -176,6 +190,8 @@ model Contact {
   lastContact         DateTime?
   nextFollowUp        DateTime?
   workspaceId         String
+  conversations       Conversation[]
+  reminders           Reminder[]
 
  createdAt            DateTime @default(now())  
  updatedAt            DateTime @updatedAt
@@ -201,4 +217,32 @@ model MediaAsset {
   workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user         User?     @relation(fields: [userId], references: [id])
   @@index([workspaceId, createdAt])
+}
+
+model Conversation {
+  id             String             @id @default(cuid())
+  contactId      String
+  source         ConversationSource
+  content        String             @db.Text
+  analyzed       Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  reminders      Reminder[]
+  contact        Contact @relation(fields:[contactId], references:[id])
+}
+
+model Reminder {
+  id               String        @id @default(cuid())
+  contactId        String
+  conversationId   String?
+  title            String
+  message          String         @db.Text
+  scheduledFor     DateTime
+  status           ReminderStatus @default(PENDING)
+  createdAt        DateTime       @default(now())
+  sentAt           DateTime?
+
+  contact          Contact       @relation(fields:[contactId], references:[id])
+  conversation     Conversation?  @relation(fields:[conversationId], references:[id])
+
+  @@index([scheduledFor, status])
 }

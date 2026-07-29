@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { EventGateway } from 'src/event/event.gateway';
 import { GetTaskQueryDto } from './dto/get-tasks-query.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class TasksService {
@@ -205,5 +206,17 @@ export class TasksService {
 
         await this.eventGateway.emitTaskDeleted(userId, workspaceId, taskId);
       }
+
+
+  //     @Cron('0 10 * * * *')
+  //     handleCron() {
+  //         this.logger.debug('Called when the current second is 45')
+  //     }
+
+  //  @Cron('*/1 * * * *')
+  // handleCronExpression() {
+  //   this.logger.debug('Called when the current second is 45');
+  // }
+
 
     }
