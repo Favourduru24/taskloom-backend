@@ -14,12 +14,12 @@ export class ConversationController {
   
     constructor(private readonly logger: LoggerService, private readonly conversationService: ConversationService) {}
 
-    @Post('create')
+    @Post(':contactId/create')
     @ResponseMessage('Conversation created successfully.')
-    async createConversation(@AuthUser() user: User, @Body() dto: CreateConversationDto) {
+    async createConversation(@AuthUser() user: User, @Param('contactId') contactId: string, @Body() dto: CreateConversationDto) {
        return handle(
         this.logger,
-        () => this.conversationService.createConversation(user.id, dto),
+        () => this.conversationService.createConversation(user.id, contactId, dto),
         'ConversationController.createConversation'
        )
     }

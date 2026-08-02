@@ -7,6 +7,7 @@ import { handle } from 'src/common/utils/handle';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { ContactsService } from './contacts.service';
 import { Auth } from 'src/auth/decorators/auth.decorator';
+import { CreateContactPreferenceDto } from './dto/create-contactpreference.dto';
 
 @Controller('contacts')
 @Auth()
@@ -43,6 +44,25 @@ export class ContactsController {
            return handle(
               this.logger,
              () => this.contactService.getContactDetail(user.id, workspaceId, contactId),
+             'ContactController.detail'
+           )
+         }
+
+        @Post(':contactId/reminder/preference')
+        @ResponseMessage('Contact reminder preference created successfully.')
+        async createContactPreference(@AuthUser() user: User, @Param('contactId') contactId: string, @Body() dto: CreateContactPreferenceDto) {
+           return handle(
+            this.logger,
+            () => this.contactService.createContactPreference(contactId, user.id, dto)
+           )
+        }
+
+        @Get(':contactId/preference/list')
+         @ResponseMessage('Contact Preference details fetched successfully')
+         async ContactPreference(@AuthUser() user: User, @Param('contactId') contactId: string) {
+           return handle(
+              this.logger,
+             () => this.contactService.getContactIdReminderPreference(user.id, contactId),
              'ContactController.detail'
            )
          }
