@@ -96,6 +96,12 @@ export class EventGateway
 
   handleConnection(client: Socket) {
     console.log('Connected:', client.id);
+
+    const user = client.data.user;
+
+    client.join(`user:${user.id}`);
+  
+    console.log(`${user.id} joined user:${user.id}`);
   }
 
   handleDisconnect(client: Socket) {
@@ -187,7 +193,7 @@ this.server
     `${client.id} left ${workspaceId}`,
   );
 
-} 
+}
 
 async emitTasksCreated(senderId: string, workspaceId: string, task: any) {
   const sender = this.onlineUsers.find(
@@ -205,6 +211,15 @@ async emitTasksCreated(senderId: string, workspaceId: string, task: any) {
     this.server.to(`workspace:${workspaceId}`).emit("task:new", task);
   } 
 
+}
+
+async emitNotificationCreated(
+  userId: string,
+  notification: any,
+) {
+  this.server
+    .to(`user:${userId}`)
+    .emit("notification:created", notification);
 }
 
 async emitTaskUpdated(

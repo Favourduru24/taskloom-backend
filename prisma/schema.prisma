@@ -57,6 +57,15 @@ enum ConversationSource {
   OTHER
 }
 
+ enum ReminderCadence {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  CUSTOM
+ }
+
  model User {
   id                    String             @id @default(uuid())
   email                 String  @unique
@@ -65,9 +74,13 @@ enum ConversationSource {
   avatarUrl             String?
 
   refreshTokens         RefreshToken[]
+  reminders             Reminder[]
+  notifications         Notification[]
+  contacts              Contact[]
   loginSessions         LoginSession[]
   MediaAsset            MediaAsset[]
   collaborators         TaskCollaborator[]
+  contactPreference     ContactPreference[]
   workspaceMembers      WorkspaceMember[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -175,6 +188,7 @@ model TaskCollaborator {
 
 model Contact {
   id                  String   @id @default(cuid())
+  userId              String
   name                String
   number              String
   email               String
@@ -192,10 +206,12 @@ model Contact {
   workspaceId         String
   conversations       Conversation[]
   reminders           Reminder[]
+  contactPreference   ContactPreference[]
 
  createdAt            DateTime @default(now())  
  updatedAt            DateTime @updatedAt
  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+ user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
  @@unique([workspaceId, priority])
 }
 
@@ -233,8 +249,9 @@ model Conversation {
 model Reminder {
   id               String        @id @default(cuid())
   contactId        String
+  userId           String
   conversationId   String?
-  title            String
+  timezone         String
   message          String         @db.Text
   scheduledFor     DateTime
   status           ReminderStatus @default(PENDING)
@@ -242,7 +259,41 @@ model Reminder {
   sentAt           DateTime?
 
   contact          Contact       @relation(fields:[contactId], references:[id])
+  user             User          @relation(fields:[userId], references:[id])
   conversation     Conversation?  @relation(fields:[conversationId], references:[id])
 
   @@index([scheduledFor, status])
+}
+
+model ContactPreference {
+  id               String   @id @default(cuid())
+  userId           String
+  contactId        String
+  reminderCadence  ReminderCadence @default(WEEKLY)
+  remindersEnabled Boolean @default(true)
+  time             String?        
+
+  timezone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contactId])
+}
+
+model Notification {
+  id         String    @id @default(cuid())
+  reminderId String
+  userId     String
+  title      String
+  body       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
 }

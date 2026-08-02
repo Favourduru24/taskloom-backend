@@ -3,11 +3,18 @@ import { createContactDto } from './dto/create-contact.dto';
 import { LoggerService } from 'src/logger/logger.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContactPriority } from '@prisma/client';
+import { CreateContactPreferenceDto } from './dto/create-contactpreference.dto';
+import { Cron } from '@nestjs/schedule';
+import { EventGateway } from 'src/event/event.gateway';
 
 @Injectable()
 export class ContactsService {
 
-    constructor(private readonly logger: LoggerService, private readonly prisma: PrismaService) {}
+    constructor(
+      private readonly logger: LoggerService,
+      private readonly prisma: PrismaService, 
+      private readonly eventGateway: EventGateway
+    ) {}
 
     async canAccessWorkspace(userId: string, workspaceId: string) {
           
@@ -50,6 +57,7 @@ export class ContactsService {
                 relationshipSummary: dto.relationshipSummary,
                 lastContact: new Date(),
                 workspaceId,
+                userId,
                 priority: ContactPriority.ACTIVE
             }
         })
@@ -91,4 +99,93 @@ export class ContactsService {
 
     return contact
    }
+
+   async createContactPreference(contactId: string, userId: string, dto: CreateContactPreferenceDto) {
+
+    this.logger.log(`create contact preference ${dto.reminderCadence} by ${userId}`, 'Contact Service')
+         
+    const owner = await this.prisma.contact.findFirst({
+      where: {userId}
+    })
+
+    if(!owner) throw new UnauthorizedException('Not Authorize to create user preference')
+    
+    const contactPreference = await this.prisma.contactPreference.create({
+        data: {
+             time: dto.time,
+             timezone: dto.timezone,
+             reminderCadence: dto.reminderCadence,
+             remindersEnabled: true,
+             contactId,
+             userId
+        }
+    })
+       
+    
+    return contactPreference
+   }
+
+   async getContactIdReminderPreference (userId: string, contactId: string) {
+       
+    this.logger.log(`fetching contact preference id:${contactId}`);
+
+   const owner = await this.prisma.contact.findFirst({
+      where: {userId}
+    })
+
+    if(!owner) throw new UnauthorizedException('Not Authorize to create user preference')
+
+    const contactPreference = await this.prisma.contactPreference.findUnique({
+      where: {userId_contactId: {userId, contactId}}
+    })
+
+    if(!contactPreference) {
+       throw new NotFoundException('Contact Preference Details not found')
+    }
+
+    return contactPreference
+   }
+
+   @Cron('* * * * *')
+   async handleReminderNotification() {
+
+    this.logger.log(`reminder is due --- sending.. notification---`);
+    const now = new Date();
+    const oneMinuteFromNow = new Date(now.getTime() + 60 * 1000);
+
+    try {
+      const reminders = await this.prisma.reminder.findMany({
+        where:{
+        status:"PENDING",
+        scheduledFor: {lte: oneMinuteFromNow}
+      },
+        include:{contact: true}
+      }
+      );
+      
+      this.logger.log(`Found ${reminders.length} reminders to publish`);
+
+      for(const reminder of reminders){
+
+        const notification = await this.prisma.notification.create({ 
+          data: {
+          reminderId:reminder.id, 
+          title:`Follow up with ${reminder.contact.name}`,
+          body: reminder.message,
+          userId: reminder.userId
+          }});
+          
+          this.eventGateway.emitNotificationCreated(reminder.userId, notification);
+          
+          await this.prisma.reminder.update({ where: {id:reminder.id},
+             data:{
+               status:"SENT",
+               sentAt:new Date()}
+          });
+
+          }
+
+    } catch (error) {
+      console.error('Error sendig reminder notification:', error);
+    }}
 }

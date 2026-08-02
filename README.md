@@ -152,3 +152,128 @@ Stateful where you need control.
 That balance is where systems start to scale quietly.
 
 i used Ai to help me get the entire and clear concept of the entire project and generate me some Schema for my database that is a better start than i blank Vs studio code page
+
+
+model PersonPreference {
+  id        String   @id @default(cuid())
+
+  userId    String
+  personId  String
+
+  reminderCadence ReminderCadence @default(WEEKLY)
+
+  remindersEnabled Boolean @default(true)
+  time             String        
+
+  timezone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, personId])
+}
+
+const preference = await prisma.userPreference.findUnique({
+    where: {
+        userId
+    }
+});
+
+{
+    reminderCadence: "WEEKLY"
+}
+
+
+Step 2: Cancel old reminder
+
+Only cancel pending default reminders.
+
+await prisma.reminder.updateMany({
+    where: {
+        personId,
+        type: "DEFAULT",
+        status: "PENDING"
+    },
+    data: {
+        status: "CANCELLED"
+    }
+});
+
+
+switch (preference.reminderCadence) {
+    case "DAILY":
+        addDays = 1;
+        break;
+
+    case "WEEKLY":
+        addDays = 7;
+        break;
+
+    case "BIWEEKLY":
+        addDays = 14;
+        break;
+
+    case "MONTHLY":
+        addDays = 30;
+        break;
+
+    case "QUARTERLY":
+        addDays = 90;
+        break;
+}
+
+
+await prisma.reminder.create({
+    data: {
+        personId,
+        type: "DEFAULT",
+        status: "PENDING",
+        scheduledFor: addDays(new Date(), days),
+        message: "Follow up with this contact."
+    }
+});
+
+
+async createConversation(
+  userId: string,
+  dto: CreateConversationDto,
+) {
+  // 1. Save the conversation
+  const conversation = await this.prisma.conversation.create({
+    data: {
+      content: dto.content,
+      personId: dto.personId,
+      source: dto.source,
+    },
+  });
+
+  // 2. Reset the default relationship reminder
+  await this.reminderService.syncDefaultReminder(
+    userId,
+    dto.personId,
+  );
+
+  // 3. (Future) Analyze with AI
+  // const analysis = await this.aiService.analyzeConversation(
+  //   dto.personId,
+  //   dto.content,
+  // );
+
+  // 4. (Future) Update AI Memory
+  // await this.aiMemoryService.update(
+  //   dto.personId,
+  //   analysis.memory,
+  // );
+
+  // 5. (Future) Create AI reminders
+  // await this.reminderService.createAiReminders(
+  //   dto.personId,
+  //   conversation.id,
+  //   analysis.actions,
+  // );
+
+  return conversation;
+}
