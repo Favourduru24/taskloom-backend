@@ -170,7 +170,7 @@ export class ContactsService {
         const notification = await this.prisma.notification.create({ 
           data: {
           reminderId:reminder.id, 
-          title:`Follow up with ${reminder.contact.name}`,
+          title:`It's been a while since your last conversation. Reach out to ${reminder.contact.name} to stay connected.`,
           body: reminder.message,
           userId: reminder.userId
           }});
@@ -188,4 +188,34 @@ export class ContactsService {
     } catch (error) {
       console.error('Error sendig reminder notification:', error);
     }}
+
+    async getAllNotification(userId: string) {
+      this.logger.log(`Fetching notifications for user: ${userId}`);
+    
+      return this.prisma.notification.findMany({
+        where: {
+          userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
+
+    async markAllAsRead(userId: string) {
+      this.logger.log(`Marking all notifications as read for user: ${userId}`);
+    
+      const result = await this.prisma.notification.updateMany({
+        where: {
+          userId,
+          read: false,
+        },
+        data: {
+          read: true,
+        },
+      });
+    
+      return {updatedCount: result.count}
+      
+    }
 }
