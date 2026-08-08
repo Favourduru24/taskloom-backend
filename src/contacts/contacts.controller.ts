@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { createContactDto } from './dto/create-contact.dto';
 import { AuthUser } from 'src/auth/decorators/user.decorator';
 import type { User } from '@prisma/client';
@@ -66,5 +66,25 @@ export class ContactsController {
              'ContactController.detail'
            )
          }
+
+        @Get('/user/notification')
+        @ResponseMessage('Notification fetched successfully')
+        async getAllNotification(@AuthUser() user: User) {
+           return handle(
+            this.logger,
+            () => this.contactService.getAllNotification(user.id),
+            'ContactController.notification'
+           )
+        }
+
+        @Patch('/user/notification/read-all')
+        @ResponseMessage('Notification updated successfully All notifications marked as read.')
+        async updateAllNotification(@AuthUser() user: User) {
+           return handle(
+            this.logger,
+            () => this.contactService.markAllAsRead(user.id),
+            'ContactController.notification'
+           )
+        }
 
 }

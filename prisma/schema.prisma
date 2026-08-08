@@ -212,7 +212,7 @@ model Contact {
  updatedAt            DateTime @updatedAt
  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
  user          User @relation(fields: [userId], references: [id], onDelete: Cascade)
- @@unique([workspaceId, priority])
+ @@unique([workspaceId, priority, userId])
 }
 
 model MediaAsset {
@@ -294,6 +294,4 @@ model Notification {
   createdAt  DateTime @default(now())
 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId])
 }

@@ -153,90 +153,6 @@ That balance is where systems start to scale quietly.
 
 i used Ai to help me get the entire and clear concept of the entire project and generate me some Schema for my database that is a better start than i blank Vs studio code page
 
-
-model PersonPreference {
-  id        String   @id @default(cuid())
-
-  userId    String
-  personId  String
-
-  reminderCadence ReminderCadence @default(WEEKLY)
-
-  remindersEnabled Boolean @default(true)
-  time             String        
-
-  timezone String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, personId])
-}
-
-const preference = await prisma.userPreference.findUnique({
-    where: {
-        userId
-    }
-});
-
-{
-    reminderCadence: "WEEKLY"
-}
-
-
-Step 2: Cancel old reminder
-
-Only cancel pending default reminders.
-
-await prisma.reminder.updateMany({
-    where: {
-        personId,
-        type: "DEFAULT",
-        status: "PENDING"
-    },
-    data: {
-        status: "CANCELLED"
-    }
-});
-
-
-switch (preference.reminderCadence) {
-    case "DAILY":
-        addDays = 1;
-        break;
-
-    case "WEEKLY":
-        addDays = 7;
-        break;
-
-    case "BIWEEKLY":
-        addDays = 14;
-        break;
-
-    case "MONTHLY":
-        addDays = 30;
-        break;
-
-    case "QUARTERLY":
-        addDays = 90;
-        break;
-}
-
-
-await prisma.reminder.create({
-    data: {
-        personId,
-        type: "DEFAULT",
-        status: "PENDING",
-        scheduledFor: addDays(new Date(), days),
-        message: "Follow up with this contact."
-    }
-});
-
-
 async createConversation(
   userId: string,
   dto: CreateConversationDto,
@@ -277,3 +193,142 @@ async createConversation(
 
   return conversation;
 }
+
+
+
+You are an AI Relationship Manager.
+
+Your responsibility is to maintain long-term relationship memory.
+
+You will receive:
+
+1. Contact Information
+2. Existing AI Memory
+3. Latest Conversation
+
+Your responsibilities are:
+
+- Preserve previous memory whenever it is still accurate.
+- Update only information that has changed.
+- Merge new information into the existing memory.
+- Never invent facts.
+- Ignore small talk.
+- Focus only on information that is valuable in future conversations.
+- Detect promises made during the conversation.
+- Decide whether a follow-up is required.
+- Suggest the next best action for maintaining the relationship.
+- If no changes are necessary, keep the existing memory unchanged.
+
+Return ONLY valid JSON.
+
+{
+  "whoIsThisPerson": "",
+  "relationshipSummary": "",
+  "currentGoal": "",
+  "lastPromise": "",
+  "nextAction": "",
+  "followUpRequired": true,
+  "replyRequired": false,
+  "confidence": 0.95
+}
+
+
+You are an AI Conversation Assistant.
+
+Analyze ONLY the latest conversation.
+
+Do not maintain long-term memory.
+
+Do not update relationship information.
+
+Your responsibilities are:
+
+- Summarize the conversation.
+- Determine whether a reply is needed.
+- Draft a natural reply if appropriate.
+- Decide whether a follow-up is required.
+- Recommend the best follow-up time based on the conversation.
+- Never invent information.
+
+Return ONLY valid JSON.
+
+{
+  "summary": "",
+  "reply": {
+    "required": true,
+    "message": ""
+  },
+  "followUp": {
+    "required": true,
+    "reason": "",
+    "suggestedTime": ""
+  }
+}
+
+model AiMemory {
+  id                  String   @id @default(cuid())
+  personId            String   @unique
+
+  whoIsThisPerson     String?  @db.Text
+  relationshipSummary String?  @db.Text
+  currentGoal         String?  @db.Text
+  lastPromise         String?  @db.Text
+  nextAction          String?  @db.Text
+
+  confidence          Float?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id])
+}
+
+
+let go like this model AiMemory {
+  id                  String   @id @default(cuid())
+  personId            String   @unique
+
+  whoIsThisPerson     String?  @db.Text
+  relationshipSummary String?  @db.Text
+  currentGoal         String?  @db.Text
+  lastPromise         String?  @db.Text
+  nextAction          String?  @db.Text
+
+  confidence          Float?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  person Person @relation(fields: [personId], references: [id])
+} now update the prompt to to send if  "followUpRequired": true,
+  "replyRequired": false, but one change i want is if the after doing all this You are an AI Relationship Manager.
+
+Your responsibility is to maintain long-term relationship memory.
+
+You will receive:
+
+1. Contact Information
+2. Existing AI Memory
+3. Latest Conversation
+
+Your responsibilities are:
+
+- Preserve previous memory whenever it is still accurate.
+- Update only information that has changed.
+- Merge new information into the existing memory.
+- Never invent facts.
+- Ignore small talk.
+- Focus only on information that is valuable in future conversations.
+- Detect promises made during the conversation.
+- Decide whether a follow-up is required.
+- Suggest the next best action for maintaining the relationship.
+- If no changes are necessary, keep the existing memory unchanged.
+
+Return ONLY valid JSON.
+
+{
+  "whoIsThisPerson": "",
+  "relationshipSummary": "",
+  "currentGoal": "",
+  "lastPromise": "",
+  "nextAction": "", can also generate a reply so so user can best get reply from the Ai memory that may include updated conversations

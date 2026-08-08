@@ -61,8 +61,8 @@ export class ConversationService {
           conversationId: conversation.id,
           timezone: preference?.timezone ?? "UTC",
           status: "PENDING",
-          scheduledFor: scheduleReminder(preference.reminderCadence),
-          message: "Follow up with this contact",
+          scheduledFor: scheduleReminder(preference.reminderCadence, undefined, new Date(), 2),
+          message: `${preference.reminderCadence} Follow-up Reminder`,
         },
       });
     
