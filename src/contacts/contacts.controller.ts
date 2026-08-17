@@ -48,12 +48,12 @@ export class ContactsController {
            )
          }
 
-        @Post(':contactId/reminder/preference')
+        @Post(':workspaceId/:contactId/reminder/preference')
         @ResponseMessage('Contact reminder preference created successfully.')
-        async createContactPreference(@AuthUser() user: User, @Param('contactId') contactId: string, @Body() dto: CreateContactPreferenceDto) {
+        async createContactPreference(@AuthUser() user: User, @Param('contactId') contactId: string, @Param('workspaceId') workspaceId: string, @Body() dto: CreateContactPreferenceDto) {
            return handle(
             this.logger,
-            () => this.contactService.createContactPreference(contactId, user.id, dto)
+            () => this.contactService.createContactPreference(contactId, user.id, workspaceId, dto)
            )
         }
 

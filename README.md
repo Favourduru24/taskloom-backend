@@ -331,4 +331,8 @@ Return ONLY valid JSON.
   "relationshipSummary": "",
   "currentGoal": "",
   "lastPromise": "",
-  "nextAction": "", can also generate a reply so so user can best get reply from the Ai memory that may include updated conversations
+  "nextAction": "", 
+  } 
+  can also generate a reply so so user can best get reply from the Ai memory that may include updated conversations
+
+  <!-- https://web.facebook.com/watch?v=2707297966320155 -->
