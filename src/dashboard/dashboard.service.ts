@@ -96,7 +96,7 @@ export class DashboardService {
 
           const todayTask = await this.prisma.task.findMany({
             where: {workspaceId: workspace.id, priority: Priority.TODO, createdAt: { gte: startOfToday,
-              lt: startOfTomorrow}}
+              lt: startOfTomorrow}},
           })
 
           if(!todayTask) {
@@ -130,6 +130,7 @@ export class DashboardService {
             gte: startOfTomorrow
           },
         },
+        include: {contact: true}
       })
 
        if(!followUp) {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { createContactDto } from './dto/create-contact.dto';
 import { AuthUser } from 'src/auth/decorators/user.decorator';
 import type { User } from '@prisma/client';
@@ -65,6 +65,21 @@ export class ContactsController {
              () => this.contactService.getContactIdReminderPreference(user.id, contactId),
              'ContactController.detail'
            )
+         }
+
+         @Delete(':workspaceId/:contactId/:preferenceId/delete')
+         @ResponseMessage('Contact deleted successfully')
+         async deleteContactPreference(@AuthUser() user: User, 
+         @Param('preferenceId') preferenceId: string,
+         @Param('contactId') contactId: string,
+         @Param('workspaceId') workspaceId: string,
+         ) {
+           return handle(
+              this.logger,
+             () => this.contactService.deleteContactPreference(preferenceId, contactId, user.id, workspaceId),
+             'ContactController.detail'
+           )
+
          }
 
         @Get('/user/notification')
