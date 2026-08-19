@@ -170,7 +170,7 @@ export class ContactsService {
             userId,
           }
         });
-  
+
       // Create ONE persistent recurring reminder
       await tx.reminder.create({
         data: {
@@ -198,6 +198,54 @@ export class ContactsService {
     return result;
   }
 
+  
+  async deleteContactPreference(
+    preferenceId: string,
+    contactId: string,
+    userId: string,
+    workspaceId: string,
+  ) {
+
+    this.logger.log(`delete contact preference by ${userId}`, 'Contact Service');
+  
+    // Verify the contact belongs to the authenticated user/workspace
+    const owner = await this.prisma.contact.findFirst({
+      where: {
+        id: contactId,
+        workspaceId,
+        userId,
+      },
+    });
+  
+    if (!owner) {
+      throw new UnauthorizedException('Not authorized to delete this contact preference');
+    }
+  
+    // Verify the preference belongs to this contact
+    const preference = await this.prisma.contactPreference.findFirst({
+      where: {
+        id: preferenceId,
+        contactId,
+      },
+    });
+  
+    if (!preference) {
+      throw new NotFoundException(
+        'Contact preference not found',
+      );
+    }
+  
+    // Delete the preference
+    await this.prisma.contactPreference.delete({
+      where: {
+        id: preferenceId,
+      },
+    });
+  
+    return {
+      message: 'Contact preference deleted successfully',
+    };
+  }
    async getContactIdReminderPreference (userId: string, contactId: string) {
        
     this.logger.log(`fetching contact preference id:${contactId}`);
