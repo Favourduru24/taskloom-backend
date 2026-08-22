@@ -2,7 +2,6 @@ import { BadRequestException, ConflictException, Inject, Injectable, Unauthorize
 import { SignupDto } from './dto/signup.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { LoggerService } from 'src/logger/logger.service';
 import { LoginDto } from './dto/login.dto';
 import { MediaType, Prisma } from '@prisma/client';

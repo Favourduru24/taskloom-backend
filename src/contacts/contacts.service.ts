@@ -399,6 +399,44 @@ export class ContactsService {
       });
     }
 
+    async deleteNotification(notificationId: string, userId: string) {
+      this.logger.log(`Deleting notification by ${userId}`);
+
+      // const owner = await this.prisma.workspace.findFirst({
+      //   where: {
+      //     userId,
+      //   },
+      // });
+    
+      // if (!owner) {
+      //   throw new UnauthorizedException('Not authorized to delete this contact preference');
+      // }
+    
+      // Verify the preference belongs to this contact
+      const notification = await this.prisma.notification.findFirst({
+        where: {
+          id: notificationId,
+        }
+      });
+    
+      if (!notification) {
+        throw new NotFoundException(
+          'Notification not found',
+        );
+      }
+    
+      // Delete the preference
+      await this.prisma.notification.delete({
+        where: {
+          id: notificationId,
+        },
+      });
+    
+      return {
+        message: 'Notification deleted successfully',
+      };
+    }
+
     async markAllAsRead(userId: string) {
       this.logger.log(`Marking all notifications as read for user: ${userId}`);
     

@@ -23,13 +23,32 @@ export class DashboardService {
           
           const startOfTomorrow = new Date(startOfToday);
           startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-          
+
+          const startOfYesterday = new Date(startOfToday);
+          startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+          const startOfWeek = new Date(now);
+          const day = startOfWeek.getDay();
+
+          // Convert Sunday=0 to Monday-based calculation
+          const daysFromMonday = day === 0 ? 6 : day - 1;
+
+          startOfWeek.setDate(startOfWeek.getDate() - daysFromMonday);
+          startOfWeek.setHours(0, 0, 0, 0);
+
+          const startOfNextWeek = new Date(startOfWeek);
+          startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
+                    
           const [
             todayFollowUpCount,
+            yesterdayFollowUpCount,
             upcomingFollowUpCount,
             newTodoTaskCount,
+            overdueTasks,
             totalContactCount,
+            newContactsThisWeek
           ] = await Promise.all([
+
             // Today's follow-ups
             this.prisma.reminder.count({
               where: {
@@ -41,7 +60,17 @@ export class DashboardService {
                 },
               },
             }),
-          
+            // Yesterday's follow-ups
+            this.prisma.reminder.count({
+              where: {
+                workspaceId: workspace.id,
+                status: ReminderStatus.PENDING,
+                scheduledFor: {
+                  gte: startOfYesterday,
+                  lt: startOfToday,
+                },
+              },
+            }),
             // Upcoming follow-ups
             this.prisma.reminder.count({
               where: {
@@ -60,7 +89,15 @@ export class DashboardService {
                 priority: Priority.TODO,
               },
             }),
-          
+            // Overdue tasks
+            this.prisma.task.count({
+              where: {
+                workspaceId: workspace.id,
+                endDate: {
+                  lt: now
+                }
+              }
+            }),
             // Total contacts
             this.prisma.contact.count({
               where: {
@@ -68,13 +105,27 @@ export class DashboardService {
                 userId,
               },
             }),
-          ]);
+             // New contacts this week
+            this.prisma.contact.count({
+              where: {
+                workspaceId: workspace.id,
+                userId,
+                createdAt: {
+                  gte: startOfWeek,
+                  lt: startOfNextWeek,
+                }
+              }
+            }),
+           ]);
           
           return {
             todayFollowUpCount,
+            yesterdayFollowUpCount,
             upcomingFollowUpCount,
             newTodoTaskCount,
+            overdueTasks,
             totalContactCount,
+            newContactsThisWeek
           };
     }
 

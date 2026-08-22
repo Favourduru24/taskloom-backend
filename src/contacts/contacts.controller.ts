@@ -101,5 +101,14 @@ export class ContactsController {
             'ContactController.notification'
            )
         }
-
+      
+        @Delete('/notification/:notificationId/delete')
+        @ResponseMessage('Notification deleted successfully')
+        async deleteNotification(@AuthUser() user: User, @Param('notificationId') notificationId: string) {
+           return handle(
+            this.logger,
+            () => this.contactService.deleteNotification(notificationId, user.id),
+            'ContactController.notification'
+           )
+        }
 }

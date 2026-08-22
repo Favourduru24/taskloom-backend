@@ -12,7 +12,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: 'https://taskloom-mauve.vercel.app',
+    origin: 'https://taskloom-mauve.vercel.app', //http://localhost:3001
     methods: ['GET', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     maxAge: 3600,
     preflightContinue: false,

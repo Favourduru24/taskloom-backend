@@ -67,7 +67,7 @@ type Presence = {
 };
 
 @WebSocketGateway({ namespace: 'events', cors: {
-  origin: 'http://localhost:3001',
+  origin: 'https://taskloom-mauve.vercel.app', //http://localhost:3001,
   credentials: true,
 },})
 export class EventGateway
